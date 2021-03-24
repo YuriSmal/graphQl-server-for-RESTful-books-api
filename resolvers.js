@@ -1,7 +1,32 @@
+const { paginateResults } = require('./utils');
+
 module.exports = {
     Query: {
-        books (_, __, { dataSources }) {
-           return dataSources.booksAPI.getAllBooks();
+        books: async (_, { pageSize = 3, after, author }, { dataSources }) => {
+            const book_author = {author: author};
+            const allBooks = await dataSources.booksAPI.getAllBooks(book_author);
+
+            const books = paginateResults({
+              after,
+              pageSize,
+              results: allBooks
+          });
+            let filter = null;
+            if (author) filter = {author: author}
+          return {
+              books,
+              filter,
+              cursor: books.length ? books[books.length - 1].cursor : null,
+              hasMore: books.length
+                ? books[books.length - 1].cursor !== allBooks[allBooks.length -1].cursor
+                : false
+          }
+        },
+
+        filteredBooksByAuthor (_, args, context) {
+            const book_author = {author: args.author};
+            const searchAuthor = context.dataSources.booksAPI.searchAuthor(book_author);
+            return searchAuthor;
         },
 
         getBooksLibrary (_, args, context) {

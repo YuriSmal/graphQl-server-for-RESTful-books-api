@@ -24,6 +24,7 @@ const server = new ApolloServer({
     })
 });
 
-server.listen(8000).then(() => {
-    console.log('Server it running!')
-})
+server.listen(8000)
+    .then(() =>   console.log('Server it running!')
+
+)

@@ -10,11 +10,25 @@ class BooksAPI extends RESTDataSource {
         request.headers.set('Authorization', 'Bearer ' + this.context.session.authToken)
     };
 
-    async getAllBooks() {
-        const response = await this.get('books');
+    async getAllBooks(book_author) {
+        if (book_author.author && book_author.author.length > 1) {
+            const response = await this.get(`books?author=${book_author.author}`);
+            return (response)
+                ? response.map(book => this.booksReducer(book))
+                : []
+        } else {
+            const response = await this.get('books');
+            return (response)
+                ? response.books.map(book => this.booksReducer(book))
+                : [];
+        }
+    }
+
+    async searchAuthor(author) {
+        const response = await this.get(`books?author=${author.author}`);
         return (response)
-            ? response.books.map(book => this.booksReducer(book))
-            : [];
+            ? response.map(book => this.booksReducer(book))
+            : []
     }
 
     async postBook(book) {
@@ -35,9 +49,8 @@ class BooksAPI extends RESTDataSource {
 
     async deleteBook(id) {
        await this.delete(`books/${id.id}`);
-       const response = await this.get('books');
-       return (response) ? response.books.map(book => this.booksReducer(book)) : [];
     }
+
 
     async addBookToLibrary(userId, bookId) {
         await this.post(`users/${userId.user_id}/books/${bookId.book_id}`);
@@ -66,6 +79,7 @@ class BooksAPI extends RESTDataSource {
 
     booksReducer(book) {
         return {
+            cursor: `${book.id}`,
             title: book.title,
             author: book.author,
             id: book.id,

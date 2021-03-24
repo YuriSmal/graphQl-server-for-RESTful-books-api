@@ -29,15 +29,27 @@ const typeDefs = gql`
     }
     
     type Query {
-        books: [Book]!
+        books(pageSize: Int, after: String, author: String): BooksConnection!
+        filteredBooksByAuthor(author: String): [Book]
         getBooksLibrary(user_id: Int): [BookOfUser]
+    }
+    
+    type Filter {
+        author: String
+    }
+    
+    type BooksConnection {
+        cursor: String
+        hasMore: Boolean!
+        filter: Filter
+        books: [Book]!
     }
    
    type Mutation {
         login(name: String!, password: String!): Session
         logOut(token: String!): Session
         signUp(name: String!, password: String!): User
-        addBook(title: String!, author: String!, pages: Int!): Book
+        addBook(title: String!, author: String!, pages: Int!): Book!
         editBook(id: Int, title: String!) : Book
         deleteBook(id: Int): [Book]
         addBookToLibrary(user_id: Int, book_id: Int): [BookOfUser]

@@ -6,6 +6,7 @@ chai.use(sinonChai);
 const resolvers = require('../../resolvers');
 const AuthAPI = require('../../datasources/authentication');
 const BooksAPI = require('../../datasources/books');
+const utils = require('../../utils');
 
 describe('#login mutation', () => {
     it('should return access and refresh tokens', async () => {
@@ -296,30 +297,80 @@ describe('#books query', () => {
     it('should return all books', async () => {
         const booksAPI = new BooksAPI();
 
-        sinon.stub(booksAPI, 'getAllBooks').returns(Promise.resolve({
-            data: {
-                books: [{
-                    title: 'test',
-                    author: 'test'
-                }]
-            }
-        }));
+        sinon.stub(booksAPI, 'getAllBooks').returns(Promise.resolve([
+                        {
+                            title: 'book 1',
+                            author: 'someone1',
+                            id: "1"
+                        },
+                        {
+                            title: 'book 2',
+                            author: 'someone2',
+                            id: "2"
+                        },
+                        {
+                            title: 'book3',
+                            author: 'someone3',
+                            id: "3"
+                        }
+                        ]
+        ));
 
-        const result = await resolvers.Query.books(null, null,
+        sinon.stub(utils, 'paginateResults').returns(
+            [
+                {
+                    title: 'book 1',
+                    author: 'someone1',
+                    id: "1"
+                },
+                {
+                    title: 'book 2',
+                    author: 'someone2',
+                    id: "2"
+                },
+                {
+                    title: 'book3',
+                    author: 'someone3',
+                    id: "3"
+                }]
+        )
+
+        const result = await resolvers.Query.books(null, {
+                pageSize: 3,
+                after: null,
+                author: undefined
+            },
             {
                 dataSources: {
                     booksAPI: booksAPI
                 }
             });
 
-        await expect(result).to.deep.equal({
-            data: {
-                books: [{
-                    title: 'test',
-                    author: 'test'
-                }]
-            }
-        })
+        await expect(result).to.deep.equal(
+            {
+                    books: [
+                            {
+                                title: 'book 1',
+                                author: 'someone1',
+                                id: "1"
+                            },
+                            {
+                                title: 'book 2',
+                                author: 'someone2',
+                                id: "2"
+                            },
+                            {
+                                title: 'book3',
+                                author: 'someone3',
+                                id: "3"
+                            }
+                        ],
+                    cursor: undefined,
+                    filter: null,
+                    hasMore: false
+                },
+
+            )
     });
 })
 

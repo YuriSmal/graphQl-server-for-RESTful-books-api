@@ -24,13 +24,6 @@ class BooksAPI extends RESTDataSource {
         }
     }
 
-    async searchAuthor(author) {
-        const response = await this.get(`books?author=${author.author}`);
-        return (response)
-            ? response.map(book => this.booksReducer(book))
-            : []
-    }
-
     async postBook(book) {
         return await this.post(
             'books',

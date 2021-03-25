@@ -23,12 +23,6 @@ module.exports = {
           }
         },
 
-        filteredBooksByAuthor (_, args, context) {
-            const book_author = {author: args.author};
-            const searchAuthor = context.dataSources.booksAPI.searchAuthor(book_author);
-            return searchAuthor;
-        },
-
         getBooksLibrary (_, args, context) {
             const user_id = {user_id: args.user_id};
             const getBooksLibrary = context.dataSources.booksAPI.getBookLibrary(user_id);
